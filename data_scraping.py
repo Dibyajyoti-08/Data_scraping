@@ -1,3 +1,4 @@
+from flask import Flask, request, render_template
 import tweepy
 import re
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -5,12 +6,14 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 
+app = Flask(__name__)
+
 consumer_key =  ''
 consumer_secret = ''
 access_token = ''
 access_token_secret = ''
 
-# Authenticate with Twitter APi
+# Authenticate with Twitter API
 auth = tweepy.OAuth1UserHandler(consumer_key, consumer_secret, access_token, access_token_secret)
 api = tweepy.API(auth)
 
@@ -23,11 +26,7 @@ def fetch_tweets(keyword, count=100):
         return tweet_list
     except tweepy.TweepError as e:
         print(f"Error fetching tweets: {e}")
-
-tweets = fetch_tweets("Python", 200)
-for tweet in tweets[:5]:
-    print(tweet)
-
+        return None
 
 # Process tweet data
 def clean_tweet(tweet):
@@ -42,13 +41,47 @@ def clean_tweet(tweet):
     
     return tweet
 
+@app.route('/', methods=['GET', 'POST'])
+def sentiment_analysis():
+    if request.method == "POST":
+        keyword = request.form["keyword"]
+        tweets = fetch_tweets(keyword, 200)
+        if not tweets:
+            return "No tweets found or an error occured."
+        
+        cleaned_tweets = [clean_tweet(tweet[0]) for tweet in tweets]
+
+        # Tokenization and Vectorization
+        vectorizer = TfidfVectorizer(max_features=5000)
+        X = vectorizer.fit_transform(cleaned_tweets)
+
+        # Sentiment Analysis Model Build
+        labels = [0 if 'bad' in tweet else 1 for tweet in cleaned_tweets]
+
+        # Train-test split
+        X_train, X_test, y_train, y_test = train_test_split(X, labels, test_size=0.2, random_state=42)
+
+        # Train the model
+        model = LogisticRegression()
+        model.fit(X_train, y_train)
+
+        # Test the model
+        y_pred = model.predict(X_test)
+        report = classification_report(y_test, y_pred, output_dict=True)
+
+        return render_template("results.html", keyword=keyword, report=report)
+    return render_template("index.html")
+
+if __name__ == '__main__':
+    app.run(debug=True)
+'''
 # Apply the processing
 cleaned_tweets = [clean_tweet(tweet[0]) for tweet in tweets]
 
 # Tokenization and Vectorization
 '''
-Convertion of cleaned tweets into numerical 
-representations using TF-IDF or Tokenizer.
+# Convertion of cleaned tweets into numerical 
+# representations using TF-IDF or Tokenizer.
 '''
 vectorizer = TfidfVectorizer(max_features=5000)
 X = vectorizer.fit_transform(cleaned_tweets).toarray()
@@ -66,3 +99,4 @@ model.fit(X_train, y_train)
 # Test the model
 y_pred = model.predict(X_test)
 print(classification_report(y_test, y_pred))
+'''
