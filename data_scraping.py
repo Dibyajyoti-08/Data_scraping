@@ -31,8 +31,8 @@ for tweet in tweets[:5]:
 
 # Process tweet data
 def clean_tweet(tweet):
-    # Remove URLs, mentions and hashtag
-    tweet = re.sub(r'http\S+|@\S+|#\S', '', tweet)
+    # Remove URLs, mentions, and hashtags
+    tweet = re.sub(r'http\S+|@\S+|#\S+', '', tweet)
 
     # Remove special characters and numbers
     tweet = re.sub(r'[^A-Za-z\s]', '', tweet)
