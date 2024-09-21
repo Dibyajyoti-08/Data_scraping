@@ -56,10 +56,13 @@ X = vectorizer.fit_transform(cleaned_tweets).toarray()
 # Sentiment Analysis Model Build
 labels = [0 if 'bad' in tweet else 1 for tweet in cleaned_tweets]
 
+# Train test split
 X_train, X_test, y_train, y_test = train_test_split(X, labels, test_size=0.2, random_state=42)
 
+# Train the model
 model = LogisticRegression()
 model.fit(X_train, y_train)
 
+# Test the model
 y_pred = model.predict(X_test)
 print(classification_report(y_test, y_pred))
