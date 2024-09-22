@@ -24,7 +24,7 @@ def fetch_tweets(keyword, count=100):
         tweets = tweepy.Cursor(api.search_tweets, q=keyword, lang="en", tweet_mode='extended').items(count)
         tweet_list = [[tweet.full_text, tweet.created_at] for tweet in tweets]
         return tweet_list
-    except tweepy.TweepError as e:
+    except tweepy.TweepyException as e:
         print(f"Error fetching tweets: {e}")
         return None
 
